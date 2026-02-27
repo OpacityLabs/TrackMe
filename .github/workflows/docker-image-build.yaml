@@ -27,7 +27,7 @@ jobs:
           DATE="$(date -u +%Y%m%d)"
           case "${GITHUB_REF_NAME}" in
             master)    CHANNEL_TAG="latest"  ;;
-            develop)     CHANNEL_TAG="dev"     ;;
+            develop)     CHANNEL_TAG="develop"     ;;
             staging) CHANNEL_TAG="staging" ;;
             *) echo "Unsupported branch: ${GITHUB_REF_NAME}"; exit 1 ;;
           esac
@@ -43,7 +43,6 @@ jobs:
         run: |
           echo "Building ${IMAGE_REPO}:${CHANNEL_TAG}"
           docker build \
-            --build-arg CLERK_PUBLISHABLE_KEY="${CLERK_PUBLISHABLE_KEY}" \
             --label org.opencontainers.image.revision="${GITHUB_SHA}" \
             --label org.opencontainers.image.source="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
             -t "${IMAGE_REPO}:${CHANNEL_TAG}" \
