@@ -1,15 +1,21 @@
-FROM golang:1.23-alpine
+FROM golang:1.23-alpine AS builder
 
-RUN apk add build-base
-RUN apk add libpcap-dev
+RUN apk add --no-cache build-base libpcap-dev
 WORKDIR /app
 
-COPY go.mod go.sum config.json ./
-COPY *.go ./
-COPY certs ./certs/
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY cmd/ ./cmd/
+COPY pkg/ ./pkg/
+RUN go build -o /app/trackme ./cmd/main.go
+
+FROM alpine:3.21
+
+RUN apk add --no-cache libpcap
+WORKDIR /app
+
+COPY --from=builder /app/trackme .
 COPY static ./static/
 
-RUN go mod download
-RUN go build -o ./out/app ./cmd/main.go
-
-CMD [ "./out/app" ]
+CMD [ "./trackme" ]
